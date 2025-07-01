@@ -1,29 +1,43 @@
 import streamlit as st
-from moviepy import VideoFileClip
+import ffmpeg
+import tempfile
 import os
 
-st.title("🎥 MP4 to MP3 Converter")
+st.title("🎥 MP4 to MP3 Converter using FFmpeg")
 
-# File uploader
+# Step 1: Upload MP4 video
 video_file = st.file_uploader("Upload MP4 Video", type=["mp4"])
 
 if video_file is not None:
-    # Save uploaded video to disk
-    with open("uploaded_video.mp4", "wb") as f:
-        f.write(video_file.read())
+    # Step 2: Save video temporarily
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video:
+        temp_video.write(video_file.read())
+        temp_video_path = temp_video.name
 
-    st.video("uploaded_video.mp4")
+    st.video(temp_video_path)
 
-    # Convert video to audio
-    st.write("Converting to MP3...")
-    video = VideoFileClip("uploaded_video.mp4")
-    video.audio.write_audiofile("converted_audio.mp3")
-    video.close()
+    # Step 3: Convert to MP3
+    if st.button("🎵 Convert to MP3"):
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
+            temp_audio_path = temp_audio.name
 
-    # Download button for audio
-    with open("converted_audio.mp3", "rb") as audio_file:
-        st.download_button("Download MP3", audio_file, file_name="audio.mp3", mime="audio/mpeg")
+        try:
+            ffmpeg.input(temp_video_path).output(temp_audio_path).run()
+            st.success("✅ MP3 file created!")
 
-    # Optional: clean up files
-    os.remove("uploaded_video.mp4")
-    os.remove("converted_audio.mp3")
+            # Step 4: Download button
+            with open(temp_audio_path, "rb") as audio_file:
+                st.download_button(
+                    label="📥 Download MP3",
+                    data=audio_file,
+                    file_name="extracted_audio.mp3",
+                    mime="audio/mpeg"
+                )
+
+        except ffmpeg.Error as e:
+            st.error("FFmpeg failed. Make sure it's installed and available in your system PATH.")
+            st.code(e.stderr.decode(), language='bash')
+
+        # Cleanup
+        os.remove(temp_video_path)
+        os.remove(temp_audio_path)
