@@ -1,46 +1,29 @@
 import streamlit as st
-import whisper
 from moviepy.editor import VideoFileClip
-import tempfile
 import os
 
-st.set_page_config(page_title="MP4 to Text Transcriber", layout="centered")
-st.title("🎬 MP4 to Text Transcriber")
-st.markdown("Upload an English `.mp4` video, and get the audio transcribed using Whisper!")
+st.title("🎥 MP4 to MP3 Converter")
 
-uploaded_file = st.file_uploader("Upload MP4 Video", type=["mp4"])
+# File uploader
+video_file = st.file_uploader("Upload MP4 Video", type=["mp4"])
 
-if uploaded_file is not None:
-    # Save uploaded video temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as video_file:
-        video_file.write(uploaded_file.read())
-        video_path = video_file.name
+if video_file is not None:
+    # Save uploaded video to disk
+    with open("uploaded_video.mp4", "wb") as f:
+        f.write(video_file.read())
 
-    # Show video preview
-    st.video(video_path)
+    st.video("uploaded_video.mp4")
 
-    if st.button("🎙 Extract & Transcribe Audio"):
-        with st.spinner("Extracting audio..."):
-            # Extract audio from video using moviepy
-            audio_path = video_path.replace(".mp4", ".mp3")
-            video_clip = VideoFileClip(video_path)
-            video_clip.audio.write_audiofile(audio_path, verbose=False, logger=None)
+    # Convert video to audio
+    st.write("Converting to MP3...")
+    video = VideoFileClip("uploaded_video.mp4")
+    video.audio.write_audiofile("converted_audio.mp3")
+    video.close()
 
-        with st.spinner("Loading Whisper model..."):
-            model = whisper.load_model("base")
+    # Download button for audio
+    with open("converted_audio.mp3", "rb") as audio_file:
+        st.download_button("Download MP3", audio_file, file_name="audio.mp3", mime="audio/mpeg")
 
-        with st.spinner("Transcribing..."):
-            result = model.transcribe(audio_path)
-            st.success("✅ Transcription Complete!")
-
-            # Display transcript
-            st.subheader("📄 Transcribed Text:")
-            st.write(result["text"])
-
-            # Download button
-            st.download_button("📥 Download Transcript", result["text"], file_name="transcript.txt")
-
-        # Cleanup
-        video_clip.close()
-        os.remove(video_path)
-        os.remove(audio_path)
+    # Optional: clean up files
+    os.remove("uploaded_video.mp4")
+    os.remove("converted_audio.mp3")
