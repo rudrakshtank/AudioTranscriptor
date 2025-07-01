@@ -2,3 +2,4 @@ streamlit
 ffmpeg-python
 SpeechRecognition
 soundfile
+numpy==2.2
