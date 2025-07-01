@@ -34,7 +34,7 @@ def transcribe_audio_with_whisper(audio_file_path):
 
 def main():
     st.set_page_config(page_title="MP4 Audio Text Extractor", page_icon="🎵", layout="wide")
-    st.title("🎵 MP4 Audio Text Extractor (No MoviePy)")
+    st.title("🎵 MP4 Audio Text Extractor")
     st.markdown("Upload an MP4 video to extract and transcribe its audio.")
 
     uploaded_file = st.file_uploader("Upload MP4 File", type=["mp4"])
