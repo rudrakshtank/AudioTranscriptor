@@ -3,7 +3,6 @@ import streamlit as st
 import tempfile
 import os
 import shutil
-from moviepy.editor import VideoFileClip
 import speech_recognition as sr
 import warnings
 warnings.filterwarnings("ignore")
