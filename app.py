@@ -1,5 +1,5 @@
 import streamlit as st
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 import os
 
 st.title("🎥 MP4 to MP3 Converter")
