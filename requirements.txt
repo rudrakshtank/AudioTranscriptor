@@ -1,4 +1,6 @@
 streamlit
 ffmpeg-python
-openai-whisper
 torch
+whisper
+numba>=0.56
+llvmlite>=0.39
