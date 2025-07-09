@@ -1,9 +1,10 @@
 import streamlit as st
 import tempfile
 import os
+import whisper
 import ffmpeg
-import speech_recognition as sr
 import warnings
+
 warnings.filterwarnings("ignore")
 
 def extract_audio(v_path, a_path):
@@ -16,15 +17,9 @@ def extract_audio(v_path, a_path):
 
 def transcribe_audio(a_path):
     try:
-        r = sr.Recognizer()
-        with sr.AudioFile(a_path) as src:
-            r.adjust_for_ambient_noise(src)
-            data = r.record(src)
-        return r.recognize_whisper(data)
-    except sr.UnknownValueError:
-        return "Could not understand the audio"
-    except sr.RequestError as e:
-        return f"Whisper error: {str(e)}"
+        model = whisper.load_model("base")  # You can change to "tiny", "small", etc.
+        result = model.transcribe(a_path)
+        return result["text"]
     except Exception as e:
         return f"Transcription error: {str(e)}"
 
@@ -83,8 +78,9 @@ def main():
 
     with st.expander("🔧 Info"):
         st.markdown("""
-        - **FFmpeg**: For audio extraction
-        - **Whisper**: For transcription
+        - **FFmpeg**: For audio extraction  
+        - **Whisper**: For transcription  
+        - Works offline with local models  
         """)
 
 if __name__ == "__main__":
